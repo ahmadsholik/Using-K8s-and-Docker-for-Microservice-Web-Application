@@ -22,10 +22,24 @@ spec:
         - containerPort: 3306
         env:
           - name: MYSQL_ROOT_PASSWORD
-            value: "12345"
-          - name: MYSQL_DATABASE
-            value: "phonebook"
-          - name: MYSQL_USER
-            value: "clarus"
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key:  root-password
           - name: MYSQL_PASSWORD
-            value: "sifre"
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: user-password
+
+        envFrom:
+          - configMapRef:
+              name: mysql-config            
+
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mysql-volume
+      volumes:
+        - name: mysql-volume
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
